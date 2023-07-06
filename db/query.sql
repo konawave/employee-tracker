@@ -1,5 +1,4 @@
-SELECT
-    role.salary AS shmoney, employee.first_name AS name
-FROM
-    role
-JOIN role.salary ON employee.first_name = value.id
+SELECT employee.id, employee.first_name, employee.last_name, role.name, department.name, role.salary, employee.manager_id
+FROM department
+JOIN role ON role.department_id = department.id
+JOIN employee ON employee.role_id = role_id;

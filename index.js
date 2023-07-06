@@ -1,16 +1,17 @@
-// const mysql = require('mysql2');
-// const inquirer = require('inquirer');
+const mysql = require('mysql2');
+const inquirer = require('inquirer');
 
-// const db = mysql.createConnection(
-//     {
-//       host: "localhost",
-//       user: "root",
-//       password: "rootpassword",
-//       database: "employees_db",
-//     },
-//     console.log(`Connected to the employees_db database.`)
-//   );
+const db = mysql.createConnection(
+    {
+      host: "localhost",
+      user: "root",
+      password: "rootpassword",
+      database: "employees_db",
+    },
+    console.log(`Connected to the employees_db database.`)
+  );
 
+  // Menu bar of options that appear when index.js is run
   const navigation = [
     {
     type: "list",
@@ -21,38 +22,41 @@
         "View all roles",
         "View all employees",
         "Add a department",
-        "Update an employee role"
-
+        "Update an employee role",
+        "Quit"
     ]
   }
-]
+];
 
-console.log(navigation.choices)
-// db.query()
+// TODO Function to view departments
 
+function viewDepartments() {
+  db.query(`SELECT * FROM departments`)
+}
 
+inquirer
+  .prompt(navigation)
+  .then((answer) => {
+    switch (answer.navigation) {
+      case "View all departments":
+        // TODO Function to view departments here
+        break;
+      case "View all roles":
+        // TODO Function to view all roles here
+        break;
+      case "View all employees":
+        //TODO Function to join all tables and show them here
+        break;
+      case "Add a department":
+        //TODO Function to make changes to add a new department to the department table here
+        break;
+      case "Update an employee role":
+        //TODO Function to change a chosen employee's role to a pre-existing role
+        break;
+      case "Quit":
+        console.log('Thank you for using this application!')
+        break;
+    }
+  })
 
-
-// inquirer
-//     .prompt([{
-//         type: 'list',
-//         message:'Select an option',
-//         name: 'directory',
-//         choices: ['view all roles', 'view all employees', 'add a department', 'add a role', 'add an employee', 'update an employee']
-//     }
-// ])
-// .then((response) => {
-//     if (response.choices === response.choices[0]) {
-//         x = 2
-//     }}
-// );
-    //   .catch((error) => {
-    //     if (error.isTtyError) {
-    //       // Prompt couldn't be rendered in the current environment
-    //     } else {
-    //       // Something else went wrong
-    //     }
-    //   });
-
-
-
+console.log(navigation[0].choices)

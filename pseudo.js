@@ -16,7 +16,8 @@
 // WHEN I choose to update an employee role
 // THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
 
-// TODO Create navigation object with every option listed in acceptance criteria
+//! TODO Create navigation object with every option listed in acceptance criteria
+    //! TODO SWITCH CASE IS HELLA NICE HERE
     // TODO When user chooses "View all departments", they are shown the departments table
     // TODO When the user selects "View all roles", they are shown the roles table
     // TODO When the user chooses "View all employees", they are shown all tables joined together. Use keys and JOIN options to make this work!

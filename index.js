@@ -108,7 +108,7 @@ function addDep() {
   inquirer
     .prompt(addDepartment)
     .then((answer) => {
-        const departmentName = answer.addDep
+        const departmentName = answer.addDep;
         db.query(`INSERT INTO department (name) VALUES ("${departmentName}")`, (error) => {
         if (error) {
           console.error(error);
@@ -129,6 +129,69 @@ function addDep() {
     })
   };
 
+// TODO Function to change employee role
+const newRole = [
+  {
+  type: "list",
+  name: "newRole",
+  message: "Enter the name of the employee's updated role",
+  choices: [
+    "Coordinator",
+    "Doctor",
+    "Market Analyst",
+    "Practice Manager",
+    "Lease Manager",
+    "Senior Accountant",
+    "Chief Executive Officer"
+  ]
+}];
+
+// This query selects an employee
+function changeEmployeeRole() {db.query('SELECT first_name, last_name FROM employee', (error, results) => {
+  if (error) {
+    console.error('Error retrieving from database', error);
+    return;
+  }
+
+  const employeeChoices = results.map((row) => `${row.first_name} ${row.last_name}`);
+
+inquirer
+  .prompt([
+    {
+      type: 'list',
+      name: 'employeeChoices',
+      message: 'Select an employee',
+      choices: employeeChoices,
+    },
+  ])
+  .then((answer) => {
+    console.log('Selected value:', answer.employeeChoices);
+  })
+  .catch((error) => {
+    console.error('Error during Inquirer prompt', error);
+  });
+});
+
+inquirer
+  .prompt(newRole)
+  .then((answer) => {
+    db.query(`SELECT id FROM role WHERE name = ${answer.newRole}`, 
+    (error, results) => {
+      if (error) {
+        console.error('Error finding role in database', error);
+        return;
+      }
+      db.query(`UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?`, [results, answer.employeeChoices[0], answer.employeeChoices[1]], (error) => {
+        if (error) {
+          console.error('Could not update chosen employee and role', error);
+          return;
+        }
+      })
+    } ) 
+    
+  })
+}
+
 inquirer
   .prompt(navigation)
   .then((answer) => {
@@ -146,7 +209,7 @@ inquirer
         addDep();
         break;
       case "Update an employee role":
-        //TODO Function to change a chosen employee's role to a pre-existing role
+        changeEmployeeRole();
         break;
       case "Quit":
         console.log('Thank you for using this application!');

@@ -5,8 +5,9 @@ const db = mysql.createConnection(
     {
       host: "localhost",
       user: "root",
-      password: "rootpassword",
-      database: "employees_db",
+      password: "7674",
+      database: "tracker_db",
+      // TODO This info should be placed in a .env file
     },
     console.log(`Connected to the employees_db database.`)
   );
@@ -28,35 +29,127 @@ const db = mysql.createConnection(
   }
 ];
 
-// TODO Function to view departments
+//! TODO Function to view departments
 
-function viewDepartments() {
-  db.query(`SELECT * FROM departments`)
+function viewDepartment() {
+  try {
+    db.query('SELECT * FROM department', (error, results) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.log(results);
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
+
+//! TODO Function to view all roles
+
+function viewRoles() {
+  try {
+    db.query(`
+    SELECT  role.name AS role_name, role.id AS role_id, department.name AS department_name, role.salary AS salary
+    FROM department
+    JOIN role ON department.id = role.department_id
+  `, (error, results) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.table(results);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+//! TODO Function that adds almost everything - similar to above
+
+function viewEmployees() {
+  try {
+    db.query(`
+    SELECT 
+e.first_name AS employee_first_name,
+e.last_name AS employee_last_name,
+m.first_name AS manager_first_name,
+m.last_name AS manager_last_name,
+r.name AS title,
+r.salary AS salary,
+d.name AS department_name
+FROM employee AS e
+LEFT JOIN employee AS m ON e.manager_id = m.id
+JOIN role AS r ON e.role_id = r.id
+JOIN department AS d ON r.department_id = d.id;`, (error, results) => {
+      if (error) {
+        console.error(error);
+        return;
+      }
+      console.table(results);
+    })  
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+//! TODO Function to add department - this should include:
+  //! TODO Prompt that asks for a department name
+  //! TODO should add the name into the department table
+  //! TODO I think this can be done with a prepared statement?
+const addDepartment = [
+  {
+  type: "input",
+  name: "addDep",
+  message: "Enter the name of the new department",
+}];
+
+function addDep() {
+  inquirer
+    .prompt(addDepartment)
+    .then((answer) => {
+        const departmentName = answer.addDep
+        db.query(`INSERT INTO department (name) VALUES ("${departmentName}")`, (error) => {
+        if (error) {
+          console.error(error);
+          return;
+        } else if (answer == null) {
+            console.log("Please enter a department name");
+            return;
+        }
+        else {console.log("Department added successfully")
+          db.query(`SELECT * FROM department`, (error, results) => {
+            if (error) {
+              console.error(error);
+              return;
+            }
+            console.table(results)
+          } )};
+      })
+    })
+  };
 
 inquirer
   .prompt(navigation)
   .then((answer) => {
     switch (answer.navigation) {
       case "View all departments":
-        // TODO Function to view departments here
+        viewDepartment();
         break;
       case "View all roles":
-        // TODO Function to view all roles here
+        viewRoles();
         break;
       case "View all employees":
-        //TODO Function to join all tables and show them here
+        viewEmployees();
         break;
       case "Add a department":
-        //TODO Function to make changes to add a new department to the department table here
+        addDep();
         break;
       case "Update an employee role":
         //TODO Function to change a chosen employee's role to a pre-existing role
         break;
       case "Quit":
-        console.log('Thank you for using this application!')
+        console.log('Thank you for using this application!');
         break;
     }
   })
-
-console.log(navigation[0].choices)

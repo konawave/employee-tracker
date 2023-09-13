@@ -147,49 +147,74 @@ const newRole = [
 }];
 
 // This query selects an employee
-function changeEmployeeRole() {db.query('SELECT first_name, last_name FROM employee', (error, results) => {
-  if (error) {
-    console.error('Error retrieving from database', error);
-    return;
-  }
+function changeEmployeeRole() {
+  db.query('SELECT first_name, last_name FROM employee', (error, results) => {
+    if (error) {
+      console.error('Error retrieving from database', error);
+      return;
+    }
 
-  const employeeChoices = results.map((row) => `${row.first_name} ${row.last_name}`);
+    const employeeChoices = results.map((row) => `${row.first_name} ${row.last_name}`);
 
-inquirer
-  .prompt([
-    {
-      type: 'list',
-      name: 'employeeChoices',
-      message: 'Select an employee',
-      choices: employeeChoices,
-    },
-  ])
-  .then((answer) => {
-    console.log('Selected value:', answer.employeeChoices);
-  })
-  .catch((error) => {
-    console.error('Error during Inquirer prompt', error);
-  });
-});
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'employeeChoices',
+          message: 'Select an employee',
+          choices: employeeChoices,
+        },
+      ])
+      .then((answer) => {
+        console.log('Selected value:', answer.employeeChoices);
 
-inquirer
-  .prompt(newRole)
-  .then((answer) => {
-    db.query(`SELECT id FROM role WHERE name = ${answer.newRole}`, 
-    (error, results) => {
-      if (error) {
-        console.error('Error finding role in database', error);
-        return;
-      }
-      db.query(`UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?`, [results, answer.employeeChoices[0], answer.employeeChoices[1]], (error) => {
-        if (error) {
-          console.error('Could not update chosen employee and role', error);
-          return;
-        }
+        inquirer
+          .prompt(newRole)
+          .then((roleAnswer) => {
+            // Enclose answer.newRole in single quotes in the SQL query
+            db.query(
+              'SELECT id FROM role WHERE name = ?',
+              [roleAnswer.newRole], // Use an array to pass parameters
+              (roleError, roleResults) => {
+                if (roleError) {
+                  console.error('Error finding role in database', roleError);
+                  return;
+                }
+
+                if (roleResults.length === 0) {
+                  console.error('Role not found in the database');
+                  return;
+                }
+
+                // Extract the role ID from the results
+                const roleId = roleResults[0].id;
+
+                // Split the selected employee's name
+                const [firstName, lastName] = answer.employeeChoices.split(' ');
+
+                // Update the employee's role using parameterized query
+                db.query(
+                  'UPDATE employee SET role_id = ? WHERE first_name = ? AND last_name = ?',
+                  [roleId, firstName, lastName],
+                  (updateError) => {
+                    if (updateError) {
+                      console.error('Could not update chosen employee and role', updateError);
+                      return;
+                    }
+                    console.log('Employee role updated successfully.');
+                  }
+                );
+              }
+            );
+          })
+          .catch((rolePromptError) => {
+            console.error('Error during new role prompt', rolePromptError);
+          });
       })
-    } ) 
-    
-  })
+      .catch((error) => {
+        console.error('Error during Inquirer prompt', error);
+      });
+  });
 }
 
 inquirer
